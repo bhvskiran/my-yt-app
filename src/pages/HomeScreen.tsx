@@ -37,7 +37,15 @@ const HomeScreen: React.FC = (props: any) => {
   const startDownloadResumable = async () => {
     try {
       setLoader(true);
-      if (!inputVal) {
+      if (
+        !inputVal ||
+        !(
+          inputVal.startsWith("https://youtu") ||
+          inputVal.startsWith("https://www.youtu")
+        )
+      ) {
+        setShowError(true);
+        setLoader(false);
         return;
       }
       const response = await ytdl.getInfo(inputVal);
@@ -96,7 +104,7 @@ const HomeScreen: React.FC = (props: any) => {
       const res1 = fileUri && (await FileSystem.readDirectoryAsync(fileUri));
       const newFileUri = fileUri + "media/";
       if (!res1?.includes("media")) {
-        const createNewFolder = await FileSystem.makeDirectoryAsync(newFileUri);
+        await FileSystem.makeDirectoryAsync(newFileUri);
       }
       const response =
         newFileUri && (await FileSystem.readDirectoryAsync(newFileUri));
@@ -134,7 +142,10 @@ const HomeScreen: React.FC = (props: any) => {
             <View style={styles.inputWrap}>
               <TextInput
                 value={inputVal}
-                onChangeText={(text: string) => setInputVal(text)}
+                onChangeText={(text: string) => {
+                  setShowError(false);
+                  setInputVal(text);
+                }}
                 onFocus={() => setShowError(false)}
                 style={styles.inputStyle}
                 placeholder="*Enter / Paste your Youtube URL"
